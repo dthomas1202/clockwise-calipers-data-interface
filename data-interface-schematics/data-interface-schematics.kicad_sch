@@ -3853,6 +3853,25 @@
 		)
 		(uuid "cf221bbb-d8d3-4e31-938e-25895078edb5")
 	)
+	(text_box "Data LED should blink each time a data packet is received"
+		(exclude_from_sim no)
+		(at 228.6 93.98 0)
+		(size 21.59 10.16)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "fe5f066a-3612-4a87-86dc-cab8fd4ae08f")
+	)
 	(symbol
 		(lib_id "power:GND")
 		(at 228.6 64.77 0)
@@ -4083,7 +4102,7 @@
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
+		(on_board no)
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "26bc8600-f865-4eb9-a79e-86caa855eb41")
@@ -4219,7 +4238,7 @@
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board yes)
+		(on_board no)
 		(dnp no)
 		(uuid "34e329ad-8645-4495-8bea-a193060b9e3e")
 		(property "Reference" "J3"
@@ -4376,7 +4395,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_THT:SW_PUSH_6mm"
 			(at 83.82 111.76 0)
 			(effects
 				(font
@@ -4444,7 +4463,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 			(at 109.474 131.826 90)
 			(effects
 				(font
@@ -4790,7 +4809,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_THT:SW_DIP_SPSTx08_Slide_9.78x22.5mm_W7.62mm_P2.54mm"
 			(at 210.82 55.88 0)
 			(effects
 				(font
@@ -4900,7 +4919,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 			(at 212.344 92.964 90)
 			(effects
 				(font
@@ -5084,7 +5103,7 @@
 		(dnp no)
 		(uuid "dc6c0825-e261-447e-a0ae-9bb86815b912")
 		(property "Reference" "D2"
-			(at 192.659 91.7576 0)
+			(at 195.453 90.7416 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5092,8 +5111,8 @@
 				(justify right)
 			)
 		)
-		(property "Value" "Connected LED"
-			(at 192.659 89.2176 0)
+		(property "Value" "Data LED"
+			(at 195.453 88.2016 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5101,7 +5120,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "LED_THT:LED_D5.0mm"
+		(property "Footprint" "LED_THT:LED_D3.0mm"
 			(at 199.39 93.98 0)
 			(effects
 				(font
@@ -5169,7 +5188,7 @@
 				)
 			)
 		)
-		(property "Footprint" "LED_THT:LED_D5.0mm"
+		(property "Footprint" "LED_THT:LED_D3.0mm"
 			(at 110.49 119.38 0)
 			(effects
 				(font
