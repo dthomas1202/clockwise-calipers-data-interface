@@ -3827,6 +3827,25 @@
 		)
 		(uuid "135d1665-d1a6-4259-a9ae-04befc70bc51")
 	)
+	(text_box "VBUS may also be used for the trigger switch input"
+		(exclude_from_sim no)
+		(at 176.53 132.08 0)
+		(size 25.4 7.62)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left top)
+		)
+		(uuid "1a3ba321-b91b-4673-93c0-36462dac4188")
+	)
 	(text_box "NOTE: May need to change pin mappings depending on board layout"
 		(exclude_from_sim no)
 		(at 119.38 48.26 0)
@@ -3922,7 +3941,7 @@
 		)
 		(uuid "6f2f7f30-f4b4-4808-bad9-ef1752faca98")
 	)
-	(text_box "Connection between J3 and SW3 should have a significant length of wire.\nJ2 should use male pin headers, J3 is female."
+	(text_box "Connection between J3 and SW3 should have a significant length of wire.\nJ2 and J3 should use use JST connectors"
 		(exclude_from_sim no)
 		(at 36.83 85.09 0)
 		(size 41.91 10.16)
