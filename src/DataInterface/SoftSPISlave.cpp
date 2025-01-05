@@ -1,3 +1,25 @@
+/*
+ * SoftSPISlave.cpp - SPI Slave Implemented in Software
+ * Copyright (C) 2025  Diesel Thomas
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// WARNING: TX (MISO) functionality is currently untested, as it was only
+// implemented for completeness
+
+
 #include "SoftSPISlave.h"
 
 
@@ -30,7 +52,16 @@ SoftSPISlave::SoftSPISlave(int16_t clkPin,
 
 
 /**
+ * Starts sending or receiving data on the SPI bus.
+ * maxClkTime defines the maximum time to wait for the next clock change
+ * while in the middle of a byte. If the time elapses, the current byte
+ * is reset to the start for the next clock cycle.
  *
+ * @param ssActiveHigh if true, slave select is active when high
+ * @param spiMode the SPI clock polarity and phase to use
+ * @param spiDataOrder whether the LSB or MSB is first
+ * @param maxClkTime milliseconds to wait for another clock before
+ *                   resetting. A value of 0 disables this
  */
 void SoftSPISlave::begin(bool ssActiveHigh = false,
                          softspi_mode_t spiMode = SSPI_MODE0,
@@ -71,7 +102,7 @@ void SoftSPISlave::begin(bool ssActiveHigh = false,
 }
 
 /**
- *
+ * Stops sending or receiving data on the SPI bus.
  */
 void SoftSPISlave::end() {
     int16_t clkIntPin = digitalPinToInterrupt(this->clkPin);
@@ -109,14 +140,17 @@ uint8_t SoftSPISlave::rxBytesRemaining() {
 }
 
 /**
+ * Returns true if data is available to be read.
  *
+ * @return true if data is available to be read
  */
 bool SoftSPISlave::rxHasData() {
     return !this->rxBuff.isEmpty();
 }
 
 /**
- * Returns true if data has been lost since the last time this was called.
+ * Returns true if data has been lost since the last time this was
+ * called.
  *
  * @return true if data has been lost
  */
@@ -129,14 +163,18 @@ bool SoftSPISlave::rxHasLostData() {
 }
 
 /**
+ * Reads a byte from the receive buffer.
  *
+ * @return a byte from the receive buffer
  */
 uint8_t SoftSPISlave::read() {
     return this->rxBuff.shift();
 }
 
 /**
+ * Reads a byte from the receive buffer without removing it.
  *
+ * @return a byte from the receive buffer
  */
 uint8_t SoftSPISlave::peek() {
     return this->rxBuff.first();
@@ -144,21 +182,28 @@ uint8_t SoftSPISlave::peek() {
 
 
 /**
+ * Returns the remaining number of bytes that can be added to the transmit
+ * buffer without blocking.
  *
+ * @return bytes available in the transmit buffer
  */
 uint8_t SoftSPISlave::txBytesAvailable() {
     return this->txBuff.available();
 }
 
 /**
+ * Returns true if the transmit buffer is full.
  *
+ * @return true if the transmit buffer is full
  */
 bool SoftSPISlave::txIsFull() {
     return this->txBuff.isFull();
 }
 
 /**
+ * Adds a byte to the transmit buffer.
  *
+ * @param data the byte to enqueue
  */
 void SoftSPISlave::write(uint8_t data) {
     this->txBuff.push(data);
@@ -166,6 +211,9 @@ void SoftSPISlave::write(uint8_t data) {
 
 /**
  * Returns the count of timeouts due to maxClkTime.
+ * NOTE: the count wraps at 255.
+ *
+ * @return the count of timeouts due to maxClkTime
  */
 uint8_t SoftSPISlave::getResyncCount() {
     return this->resyncCount;
@@ -173,10 +221,11 @@ uint8_t SoftSPISlave::getResyncCount() {
 
 
 /**
- *
+ * Interrupt Service Routine ran on either the RISING or FALLING edge of the clock.
+ * Handles setting up the MISO pin on a shift out clock cycle, and reading the
+ * MOSI pin on a sampling clock cycle.
  */
 void SoftSPISlave::clkIsr() {
-    // Runs on either RISING or FALLING edge of CLK
     static uint32_t lastClkTime = 0;
     static uint8_t rxData = 0;
     static uint8_t txData = 0;
@@ -209,55 +258,56 @@ void SoftSPISlave::clkIsr() {
 
     // Reset if the time between clock pulses was too long
     if (this->dataIndex > 0
-        && this->maxClkTime > 0 // maxClkTime is enabled
-        && currentTime - lastClkTime > this->maxClkTime) {
+            && this->maxClkTime > 0 // maxClkTime is enabled
+            && currentTime - lastClkTime > this->maxClkTime) {
         this->dataIndex = 0;
-    this->resyncCount++;
+        this->resyncCount++;
+    }
+
+    lastClkTime = currentTime;
+
+    // Send/Receive bits in the correct order
+    if (this->spiDataOrder == SSPI_MSB_FIRST) {
+        index = 7 - (this->dataIndex / 2);
+    } else {
+        index = (this->dataIndex / 2);
+    }
+
+    if (clkSample && this->mosiPin >= 0) {
+        // This is a sampling clock cycle
+        bool mosiState = digitalRead(this->mosiPin);
+
+        rxData = SoftSPISlave::setBitTo(rxData, index, mosiState);
+
+    } else if (!clkSample && this->misoPin >= 0) {
+        // This is a shift out clock cycle
+        if (!this->spiCPHA) { // SPI MODE0 or MODE2
+            // Need to set MISO to future bit
+            // NOTE The index will be out of bounds on the last clock
+            // cycle. This is fine since this bit is never read by the
+            // master, and getBit() will just return all zeros
+            index++;
         }
 
-        lastClkTime = currentTime;
+        digitalWrite(this->misoPin, SoftSPISlave::getBit(txData, index));
+    }
 
-        // Send/Receive bits in the correct order
-        if (this->spiDataOrder == SSPI_MSB_FIRST) {
-            index = 7 - (this->dataIndex / 2);
-        } else {
-            index = (this->dataIndex / 2);
-        }
+    this->dataIndex++;
 
-        if (clkSample && this->mosiPin >= 0) {
-            // This is a sampling clock cycle
-            bool mosiState = digitalRead(this->mosiPin);
-
-            rxData = SoftSPISlave::setBitTo(rxData, index, mosiState);
-
-        } else if (!clkSample && this->misoPin >= 0) {
-            // This is a shift out clock cycle
-            if (!this->spiCPHA) { // SPI MODE0 or MODE2
-                // Need to set MISO to future bit
-                // NOTE The index will be out of bounds on the last clock
-                // cycle. This is fine since this bit is never read by the
-                // master, and getBit() will just return all zeros
-                index++;
-            }
-
-            digitalWrite(this->misoPin, SoftSPISlave::getBit(txData, index));
-        }
-
-        this->dataIndex++;
-
-        if (this->dataIndex > 15) {
-            // Deal with buffers and reset
-            // .push() returns false if an overwrite occurred
-            this->rxDataLost = !this->rxBuff.push(rxData);
-            this->dataIndex = 0;
-        }
+    if (this->dataIndex > 15) {
+        // Deal with buffers and reset
+        // .push() returns false if an overwrite occurred
+        this->rxDataLost = !this->rxBuff.push(rxData);
+        this->dataIndex = 0;
+    }
 }
 
 /**
- *
+ * Interrupt Service Routine ran on either the RISING or FALLING edge of slave select.
+ * Sets MISO as an output and sets it up for the next clock cycle when going active.
+ * Sets MISO as an input when going inactive.
  */
 void SoftSPISlave::ssIsr() {
-    // Runs on either RISING or FALLING edge of SS, so long as MISO is defined
     bool ssActive = digitalRead(this->ssPin) == this->ssActiveHigh;
 
     if (ssActive) {

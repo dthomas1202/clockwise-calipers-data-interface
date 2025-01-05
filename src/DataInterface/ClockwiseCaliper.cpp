@@ -1,3 +1,22 @@
+/*
+ * ClockwiseCaliper.cpp - Clockwise Caliper Serial Data Decoder
+ * Copyright (C) 2025  Diesel Thomas
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "ClockwiseCaliper.h"
 
 
@@ -71,8 +90,8 @@ void ClockwiseCaliper::updateDataBytes(uint8_t msb, uint8_t mb, uint8_t lsb) {
  * Also clears the newData flag.
  */
 void ClockwiseCaliper::refershData() {
-    this->swapReadWrite();
     this->clearNewData();
+    this->swapReadWrite();
 }
 
 
@@ -88,24 +107,20 @@ uint32_t ClockwiseCaliper::getRawMeasurement() {
 /**
  * Returns the converted measurement.
  * Conversion will be done to whichever unit is selected on the calipers.
- * The measurement and the conversion unit will be returned.
  * The measurement may be positive or negative depending on the sign.
  *
- * @return the measurement and unit
+ * @return the converted measurement
  */
-caliper_measurement_t ClockwiseCaliper::getMeasurement() {
-    caliper_measurement_t measureData;
+float ClockwiseCaliper::getMeasurement() {
+    float measurement = this->getRawMeasurement();
 
-    measureData.unit = this->getUnit();
-    measureData.measurement = this->getRawMeasurement();
-
-    switch (measureData.unit) {
+    switch (this->getUnit()) {
         case MILLIMETERS:
-            measureData.measurement /= 100; // From hundredths of a millimeter
+            measurement /= 100; // From hundredths of a millimeter
             break;
 
         case INCHES:
-            measureData.measurement /= 2000; // From 1/2 thousandths of an inch
+            measurement /= 2000; // From 1/2 thousandths of an inch
             break;
 
         default:
@@ -113,10 +128,10 @@ caliper_measurement_t ClockwiseCaliper::getMeasurement() {
     }
 
     if (this->getSign() == NEGATIVE) {
-        measureData.measurement *= -1;
+        measurement *= -1;
     }
 
-    return measureData;
+    return measurement;
 }
 
 
@@ -130,6 +145,27 @@ caliper_unit_t ClockwiseCaliper::getUnit() {
 }
 
 /**
+ * Returns the current measurement unit as a string.
+ *
+ * @return the current measurement unit as a pointer to a C string
+ */
+char* ClockwiseCaliper::getUnitString() {
+    char *unitString = EMPTY_STR;
+
+    switch (this->getUnit()) {
+        case MILLIMETERS:
+            unitString = MILLIMETERS_STR;
+            break;
+
+        case INCHES:
+            unitString = INCHES_STR;
+            break;
+    }
+
+    return unitString;
+}
+
+/**
  * Returns the current measurement sign.
  *
  * @return the current measurement sign
@@ -138,11 +174,24 @@ caliper_sign_t ClockwiseCaliper::getSign() {
     return this->pReadCaliperData->data.sign;
 }
 
+/**
+ * Returns the current measurement sign as a string.
+ *
+ * @return the current measurement sign as a pointer to a C string
+ */
+char* ClockwiseCaliper::getSignString() {
+    char *signString = POSITIVE_STR;
+
+    if (this->getSign() == NEGATIVE) {
+        signString = NEGATIVE_STR;
+    }
+
+    return signString;
+}
+
 
 /**
  * Sets the newData flag.
- * The newData flag is used to indicate that the data has been updated since it
- * was last read.
  */
 void ClockwiseCaliper::setNewData() {
     this->newData = true;
@@ -150,8 +199,6 @@ void ClockwiseCaliper::setNewData() {
 
 /**
  * Clears the newData flag.
- * The newData flag is used to indicate that the data has been updated since it
- * was last read.
  */
 void ClockwiseCaliper::clearNewData() {
     this->newData = false;
@@ -159,8 +206,8 @@ void ClockwiseCaliper::clearNewData() {
 
 /**
  * Returns the status of the newData flag.
- * The newData flag is used to indicate that the data has been updated since it
- * was last read.
+ * The newData flag is used to indicate that the data has been updated
+ * since it was last read.
  *
  * @return true if set, false otherwise
  */
