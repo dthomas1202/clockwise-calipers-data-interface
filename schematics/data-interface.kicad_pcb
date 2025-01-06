@@ -8710,8 +8710,8 @@
 		)
 	)
 	(gr_rect
-		(start 134.83 70.345)
-		(end 164.98 140.245)
+		(start 134.905 70.295)
+		(end 164.905 140.295)
 		(stroke
 			(width 0.2)
 			(type default)
@@ -8719,6 +8719,25 @@
 		(fill none)
 		(layer "Edge.Cuts")
 		(uuid "8fd42633-d1f9-4cca-8c07-043b71a2a450")
+	)
+	(gr_text_box "Example layout for a 2.54mm 10x24 (30x70mm) protoboard."
+		(start 133.395 54.495)
+		(end 166.415 64.655)
+		(layer "Cmts.User")
+		(uuid "c8e34ffb-6e5e-49fe-9dd1-ddd7b5eb36d3")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.3)
+				(bold yes)
+			)
+			(justify left top)
+		)
+		(border yes)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
 	)
 	(segment
 		(start 153.715 83.705)

@@ -5284,7 +5284,7 @@
 		)
 		(uuid "1a3ba321-b91b-4673-93c0-36462dac4188")
 	)
-	(text_box "A0-A3 and D14-D16 should have internal pull-ups enabled.\nD10 is PWM output for the buzzer.\nD9 is data LED output."
+	(text_box "A0-A2 and D14-D16 must have internal pull-ups enabled.\nD10 is PWM output for the buzzer.\nA3 is data LED output."
 		(exclude_from_sim no)
 		(at 163.83 91.44 0)
 		(size 21.59 17.78)
@@ -5303,7 +5303,7 @@
 		)
 		(uuid "1fd56704-8278-4163-a78f-35a7ec846098")
 	)
-	(text_box "D7 must have pull-up resitiors enabled."
+	(text_box "D7 must have internal pull-up resitiors enabled."
 		(exclude_from_sim no)
 		(at 114.3 90.17 0)
 		(size 19.05 7.62)
@@ -5341,25 +5341,6 @@
 		)
 		(uuid "2e8d35dc-f235-4251-96a5-8afcf187cac6")
 	)
-	(text_box "J2 and J3 should use use JST connectors"
-		(exclude_from_sim no)
-		(at 93.98 123.19 0)
-		(size 20.32 7.62)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(fill
-			(type none)
-		)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left top)
-		)
-		(uuid "cf221bbb-d8d3-4e31-938e-25895078edb5")
-	)
 	(text_box "Example USB cable with trigger button capability.\nNote: The USB Micro B device is supplying power on VBUS."
 		(exclude_from_sim no)
 		(at 88.9 171.45 0)
@@ -5379,10 +5360,10 @@
 		)
 		(uuid "e75755ff-4cdf-4f39-a5cd-358e565c852c")
 	)
-	(text_box "The resistance between GND and all of VBUS, D+, and D- in parallel can not be less than ~4.7k before the calipers start to behave weirdly"
+	(text_box "The resistance between GND and all of VBUS, D+, and D- in parallel must not be less than ~5k ohms before the calipers start to behave weirdly"
 		(exclude_from_sim no)
 		(at 55.88 83.82 0)
-		(size 24.13 15.24)
+		(size 24.13 17.78)
 		(stroke
 			(width 0)
 			(type default)
