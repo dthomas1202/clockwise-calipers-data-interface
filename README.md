@@ -7,28 +7,36 @@ The DTCR-02 Data Cable allows DCLR-XX05 series calipers to transfer their curren
 This data interface aims to improve on this by adding additional features, and providing a basis for using the calipers serial protocol for other use cases.
 
 Some of the data interface features include:
-- Emulates a generic USB keyboard, compatible with Linux, Windows, MacOS, iOS[^ios_keyboard], Android[^android_keyboard].
+
+- Emulates a generic USB keyboard, compatible with Linux, Windows, MacOS, iOS[^ios_keyboard], Android[^android_keyboard], and really anything that supports USB keyboards.
 - Supports multiple ways to trigger sending the measurement to the computer.
-    - Included push button on the data interface.
-    - 2 pin JST connector for a remote push button or foot pedal.
-    - A custom USB cable with a push button mounted on the calipers. (See schematics for details)
+  - Included push button on the data interface.
+  - 2 pin JST connector for a remote push button or foot pedal.
+  - A custom USB cable with a push button mounted on the calipers. (See schematics for details)
 - Two LEDs to indicate power status, and the successful reception of data packets from the calipers.
-- Multiple different configuration options set via a DIP switch.
-    - The option to send `CTRL + A` before the measurement is sent so previous measurements are overwritten.
-    - Enable sending the units (mm/in) after the measurement. (Such as `1.23 mm`)
-    - Setting any combination of a newline, tab, comma, or space to be sent after the measurement.
-    - Enabling a buzzer to provide an audible queue when a measurement is sent.
-    - 
+- Multiple different configuration options can be set via a DIP switch.
+  - The option to send `CTRL + A` before the measurement is sent so previous measurements are overwritten.
+  - Enable sending the units (mm/in) after the measurement. (Such as `1.23 mm`)
+  - Setting any combination of a newline, tab, comma, or space to be sent after the measurement.
+  - Enabling a buzzer to provide audible feedback when a measurement is sent.
+  - Enable the trigger input using the USB ports VBUS pin. (See schematics for details)
 
+## Hardware
 
-## The "RS232" Serial Protocol
+## Installing to an Arduino
+
+## Extra Details
+
+### The "RS232" Serial Protocol
+
 Clockwise Tools own online store page for the Data Cable, as well as other online marketplaces use the term "RS232" as part of the product title.
 However, upon investigating the data being sent over the micro USB B port, it is instead using synchronous serial communication over the D+ and D- wires of the USB port.
 This is effectively SPI, just without the chip select and MISO signals.
 
 The calipers transmit 24 bits of data every ~150ms over the D+ and D- wires at 1.5V.
 It seems to transmit regardless of if anything is plugged in to the USB port, or the calipers are turned on or off.
-During data transmission, the clock has a rate of ~0.4ms per clock cycle.
+The clock has a rate of ~0.4ms per clock cycle, and the clock phase and polarity are equivalent to SPI Mode 3.
+However, because of the transistors used for level shifting, the polarity is inverted, so SPI Mode 1 is used.
 The D+ wire carries the data signal, while D- carries the clock.
 The USB ports +5V pin is also powered by the calipers, however only at 1.5V.
 
@@ -49,10 +57,10 @@ Note that the fraction mode is sent exactly the same as inches over the USB port
 
 The full implementation of decoding and converting the 24 bit packets can be seen in ClockwiseCaliper.cpp.
 
-## Hardware
+### Potential Improvements
+
 Schematics for a working implementation of the data interface are included with this project.
 I built my own out of parts that I had lying around, however there are some improvements that can be made given the right parts.
-
 
 [^ios_keyboard]: iOS devices will complain if the device reports that it uses more than 100mA.
     By default, most Arduino's report their bMaxPower USB configuration descriptor to be 500mA.
@@ -60,5 +68,5 @@ I built my own out of parts that I had lying around, however there are some impr
     \
     Note that for iDevices with a lightning port, a Lightning to USB Camera Adapter (only the USB port) will allow connecting the device, so long as it reports a lower power consumption.
     Additionally, the Lightning to USB 3 Camera Adapter (both a USB port and a lightning port) MAY allow devices that report more than 100mA to work, so long as a charging cable is plugged in.
-    
+
 [^android_keyboard]: I have not tested any Android devices with the data interface, but I would assume that with the right adapter, and potentially the iOS bMaxPower tweak above that it would work.
